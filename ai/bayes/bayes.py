@@ -16,14 +16,24 @@ def loadDataSet():
     classVec = [0, 1, 0, 1, 0, 1]  # 1 is abusive, 0 not
     return postingList, classVec
 
-
+"""
+将postingList变成唯一的一维列表，（类似关键字）
+"""
 def createVocabList(dataSet):
     vocabSet = set([])  # create empty set
     for document in dataSet:
         vocabSet = vocabSet | set(document)  # union of the two sets
     return list(vocabSet)
 
-
+"""
+in:
+inputSet    要分类的原文。
+vocabList   所有的垃圾词汇表（关键字），成员唯一，彼此独立(为list = set(list))。
+out:
+returnVec   存在垃圾邮件关键字的列表微量
+disc:
+在vocabList中的词，如果存在于inputSet则些对应的值置1.
+"""
 def setOfWords2Vec(vocabList, inputSet):
     returnVec = [0] * len(vocabList)
     for word in inputSet:
@@ -34,6 +44,17 @@ def setOfWords2Vec(vocabList, inputSet):
     return returnVec
 
 
+"""
+in:
+trainMatrix   。
+trainCategory   
+out:
+p0Vect
+p1Vect
+pAbusive
+disc:
+在vocabList中的词，如果存在于inputSet则些对应的值置1.
+"""
 def trainNB0(trainMatrix, trainCategory):
     numTrainDocs = len(trainMatrix)
     numWords = len(trainMatrix[0])

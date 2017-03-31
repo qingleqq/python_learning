@@ -116,6 +116,12 @@ dateset = [
     [3, 0, 0, 1, 'yes'],
 ]
 
+def count_feature(dataSet_list, col, key_feature):
+    rtn_dict = {}
+    feature_list = [x[col] for x in dataSet_list]
+    for feature in feature_list:
+        rtn_dict[feature] = rtn_dict.get(feature,0) + 1
+    return rtn_dict
 
 def demo():
     ret = []
