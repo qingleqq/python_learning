@@ -1,4 +1,5 @@
 import numpy as ny;
+import math
 
 def get_data():
     feather_label_list = []
@@ -29,20 +30,19 @@ def spilt_feature(dataSet_list, col, key_feature):
         tmp_dict[feature] = tmp_list
     return tmp_dict
     rtn_dict[key_feature] = tmp_dict
-    print rtn_dict
+    print(rtn_dict)
 
 def count_feature(dataSet_list, col, key_feature):
-    rtn_dict = {}
     feature_list = [x[col] for x in dataSet_list]
     tmp_dict = {};
     for feature in feature_list:
         tmp_dict[feature] = tmp_dict.get(feature,0) + 1
+
+    i = len(feature_list)
+    for key,value in tmp_dict.items():
+            tmp_dict[key] = (float)(tmp_dict[key]) / len(feature_list)
+            tmp_dict[key]= round(tmp_dict[key],4)
     """
-    for key in tmp_dict.keys():
-        if sum(feature_list) == 0:
-            print 'here'
-        else:
-            tmp_dict[key] = tmp_dict[key] / sum(feature_list)
     """
     return tmp_dict
     rtn_dict[key_feature] = tmp_dict
@@ -50,12 +50,43 @@ def count_feature(dataSet_list, col, key_feature):
 
 def create_dict_for_feature(dataSet_list, featureName_list):
     rtn_dict = spilt_feature(dataSet_list, -1, 'label')
+    feature_len = len(dataSet_list[0])-1
     tmp_dict = {}
     for k,v in rtn_dict.items():
-        for i in range(4):
+        for i in range(feature_len):
             tmp_dict['col' + str(i)] = count_feature(v,i,"col")
+        tmp_dict[k] = count_feature(dataSet_list,-1,"label")
         rtn_dict[k]= tmp_dict.copy()
-    print rtn_dict
+    return(rtn_dict)
+
+def get_possivevalue(dataSet_dict, labelValue, featureName, featureValue):
+    if labelValue in dataSet_dict.keys():
+        tmp_dict = dataSet_dict[labelValue]
+        if featureName in tmp_dict.keys():
+            tmp_dict = tmp_dict[featureName]
+            if featureValue in tmp_dict:
+                return tmp_dict[featureValue]
+    return 0;
+
+def check_possive(dataSet_dict, datacheck_list):
+    dict_rtn = {}
+    for k,v in dataSet_dict.items():
+        i = 0
+        """
+        possive_f = 1.0
+        for val in datacheck_list:
+            possive_f *= get_possivevalue(dataSet_dict,k,'col'+str(i),val);
+            i+=1
+        possive_f *= get_possivevalue(dataSet_dict,k,k,k);
+        """
+        possive_f = 0.0
+        for val in datacheck_list:
+            possive_f += math.log(get_possivevalue(dataSet_dict, k, 'col' + str(i), val));
+            i+=1
+        possive_f += math.log(get_possivevalue(dataSet_dict,k,k,k));
+
+        dict_rtn[k] = possive_f
+    return dict_rtn
 
 dateset = [
     # {'c': {0: 'yes', 1: 'no', 2: 'no', 3: 'no'}}
@@ -66,13 +97,34 @@ dateset = [
     [0, 3, 2, 1, 'no'],
     [1, 0, 3, 2, 'no'],
 ]
+data_study= [
+    [1,1,0,1],
+    [0,0,1,0],
+    [1,0,1,0],
+    [1,0,0,1],
+    [0,1,0,1],
+    [0,1,1,0],
+    [0,1,0,0],
+    [0,0,1,1],
+]
+data_study_dict={}
+data_check_study=[1,0,1]
+
+def demo_study():
+    data_study_dict = create_dict_for_feature(data_study,-1)
+    i = check_possive(data_study_dict, data_check_study)
+    print i;
+
+    pass
+
 
 def demo():
     color = spilt_feature(dataSet_list=dateset,col=0, key_feature='color')
-    create_dict_for_feature(dateset,['a'])
+    color = create_dict_for_feature(dateset,['a'])
     style = count_feature(dataSet_list=dateset,col=4, key_feature='style')
-
+    print(color)
+    print get_possivevalue(color,'yes','col2',1)
 
     print style
 
-demo();
+demo_study();

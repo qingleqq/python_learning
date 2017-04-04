@@ -47,7 +47,7 @@ def setOfWords2Vec(vocabList, inputSet):
 """
 in:
 trainMatrix   。
-trainCategory   
+trainCategory
 out:
 p0Vect
 p1Vect
