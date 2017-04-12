@@ -36,6 +36,7 @@ def next_weight(feature_list, label_list, weight_list):
                                                *feature_array[:,j])
     return 0
 
+
 def test_vector():
     vector0 = ny.linspace(1,20,20)
     vector1 = ny.linspace(start=2, stop=20, num=10,endpoint=1)
