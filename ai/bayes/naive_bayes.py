@@ -1,9 +1,38 @@
 import numpy as ny;
 import math
 
-def get_data():
-    feather_label_list = []
-    return feather_label_list
+def get_data(params):
+    feather_label_list= [
+        [1,1,0,1],
+        [0,0,1,0],
+        [1,0,1,0],
+        [1,0,0,1],
+        [0,1,0,1],
+        [0,1,1,0],
+        [0,1,0,0],
+        [0,0,1,1],
+    ]
+
+    rtnMatrix = []
+    rtnLable = []
+    fd = open(params)
+    i = 0
+    while True:
+        line = fd.readline()
+        if line is None:
+            pass
+            # break
+        data_str = line.split('\t')
+        #if tmp[0].isnumeric():
+        if data_str[0].isdigit():
+            tmp = [float(i) for i in data_str[:-1]]
+            tmp.append(data_str[-1])
+            rtnMatrix.append(tmp)
+        else:
+            print(tmp)
+            break
+    #rtnMatrix = ny.array(rtnMatrix)
+    return rtnMatrix[:-100],rtnMatrix[-100:]
 
 def Pretreatment(data_list):
     rtn_list= data_list;
@@ -84,8 +113,8 @@ def check_possive(dataSet_dict, datacheck_list):
             possive_f += math.log(get_possivevalue(dataSet_dict, k, 'col' + str(i), val));
             i+=1
         possive_f += math.log(get_possivevalue(dataSet_dict,k,k,k));
-
         dict_rtn[k] = possive_f
+
     return dict_rtn
 
 dateset = [
@@ -97,25 +126,16 @@ dateset = [
     [0, 3, 2, 1, 'no'],
     [1, 0, 3, 2, 'no'],
 ]
-data_study= [
-    [1,1,0,1],
-    [0,0,1,0],
-    [1,0,1,0],
-    [1,0,0,1],
-    [0,1,0,1],
-    [0,1,1,0],
-    [0,1,0,0],
-    [0,0,1,1],
-]
+
 data_study_dict={}
 data_check_study=[1,0,1]
 
 def demo_study():
-    data_study_dict = create_dict_for_feature(data_study,-1)
-    i = check_possive(data_study_dict, data_check_study)
-    print i;
+    data_know,study_unknow = get_data('datingTestSet.txt');
 
-    pass
+    data_study_dict = create_dict_for_feature(data_know,-1)
+    i = check_possive(data_study_dict, study_unknow)
+    print i;
 
 
 def demo():
