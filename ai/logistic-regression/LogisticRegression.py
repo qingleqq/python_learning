@@ -1,39 +1,81 @@
 import numpy as ny
 
-
-def get_data():
-    feature_list = []
-    label_list = []
-    return feature_list, label_list
+import re
 
 
-def vector_dot(vector_0, vector_1):
-    rtn_vector = [ i_vector_0 * i_vector_1 for i_vector_0, i_vector_1 in zip( vector_0, vector_1)]
-    return sum(rtn_vector)
+def get_data(filename):
+    rtnMatrix = []
+    rtnLable = []
+    fd = open(filename)
+    re_cmp = re.compile(r'^[+-]{0,1}\d*\.{0,1}\d*\t[+-]{0,1}\d*\.{0,1}\d*\t[01]\r\n$')
+    i = 0;
+    while True:
 
+        line = fd.readline()
+        if line is None:
+            break
+        k = re_cmp.findall(line)
+        if len(k) != 0:
+            tmp = line.split('\t')
+            tmplist = [1]
+            tmplist.extend([float(val) for val in tmp[:-1]])
+            rtnMatrix.append(tmplist)
+            rtnLable.append(int(tmp[-1]))
+        else:
+            print(tmp)
+            break
+
+    rtnMatrix = ny.array(rtnMatrix)
+    rtnMatrix.shape = [-1, 3]
+    # rtnMatrix = rtnMatrix.reshape((-1, 3))
+    return rtnMatrix, rtnLable
+
+def pre_tread(feature_array):
+    num_samples, num_features = feature_array.shape
+    rtn_list = []
+    for i in range(num_features):
+        tmp = feature_array[:,i];
+        max_v = max(tmp)
+        min_v = min(tmp)
+        rtn_list.append((tmp-min_v)/(max_v-min_v))
+    rtn_array = ny.array(rtn_list).transpose()
+    return rtn_array
 
 def sigmoid(feature_list, w_list):
-    return 1.0 / (1 + ny.math.exp(-1 * sum(feature_list*w_list)))
+    feature_matrix = ny.matrix(feature_list)
+    w_matrix = ny.matrix(w_list).transpose()
+    #tmp = (feature_matrix*w_matrix)
+    tmp = 1.0 / (1 + ny.exp(-1*(feature_matrix*w_matrix)))
+    return tmp
 
+def per_step(feature_array, weight_array, label_array):
+    label_matrix = ny.matrix(label_array).transpose()
+    sigmoid_matrix = sigmoid(feature_array, weight_array)
+    diff_matrix = label_matrix - sigmoid_matrix
+    rtn_matrix = ny.matrix(feature_array).transpose() * diff_matrix
+    return rtn_matrix
 
-def next_weight(feature_list, label_list, weight_list):
+    """
+    sum_v = 0
+    for i in range(feature_num_col):
+        sum_v += (sigmoid(feature_array[i],weight_array)-label_array[i])*feature_array[i,y]
+    weight_array[j] = weight_array[j] - alpha*sum_v
+    """
+def compute_weight(feature_list, label_list):
     feature_array = ny.array(feature_list)
     label_array = ny.array(label_list)
-    feature_num_row,feature_num_col = feature_array.shape()
-    weight_array = ny.ones(feature_num_row)
+    sample_num, feature_num = feature_array.shape
+    weight_array =  ny.ones(feature_num)
     rtn_next_w = []
     alpha = 0.003
-    while True:
-        for j in range(feature_num_row):
-            """
-            sum_v = 0
-            for i in range(feature_num_col):
-                sum_v += (sigmoid(feature_array[i],weight_array)-label_array[i])*feature_array[i,y]
-            weight_array[j] = weight_array[j] - alpha*sum_v
-            """
-            rtn_next_w[j] = weight_array[j] + alpha*\
-                                              ((sigmoid(feature_array,weight_array)-label_array)
-                                               *feature_array[:,j])
+
+    for i in xrange(500):
+        tmp = alpha * per_step(feature_array,weight_array,label_array)
+        rtn_next_w =  ny.matrix(weight_array)+ tmp.transpose()
+        weight_array = rtn_next_w.tolist()[0]
+        print(i,weight_array)
+
+    print weight_array
     return 0
 
 
@@ -52,4 +94,15 @@ def test_vector():
 
     print(tmp,vector4)
 
-test_vector()
+def demo():
+    #match = re.compile('[^+-]{0,1}\d{0,}\.\d{0,}$')
+    r'^\d+&'
+    feature_array,label_array = get_data('/opt/qingleqq/work/app/python_study/python_learning/ai/logistic-regression/testSet.txt')
+    #feature_array = pre_tread(feature_array)
+    #print (feature_array,label_array);
+
+    compute_weight(feature_array,label_array)
+
+
+demo();
+#test_vector()
