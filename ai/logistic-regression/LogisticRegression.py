@@ -41,18 +41,16 @@ def pre_tread(feature_array):
     rtn_array = ny.array(rtn_list).transpose()
     return rtn_array
 
-def sigmoid(feature_list, w_list):
-    feature_matrix = ny.matrix(feature_list)
-    w_matrix = ny.matrix(w_list).transpose()
+def sigmoid(feature_matrix, w_matrix):
     #tmp = (feature_matrix*w_matrix)
     tmp = 1.0 / (1 + ny.exp(-1*(feature_matrix*w_matrix)))
     return tmp
 
-def per_step(feature_array, weight_array, label_array):
-    label_matrix = ny.matrix(label_array).transpose()
-    sigmoid_matrix = sigmoid(feature_array, weight_array)
+def per_step(feature_matrix, weight_matrix, label_matrix):
+    label_matrix = label_matrix.transpose()
+    sigmoid_matrix = sigmoid(feature_matrix, weight_matrix.transpose())
     diff_matrix = label_matrix - sigmoid_matrix
-    rtn_matrix = ny.matrix(feature_array).transpose() * diff_matrix
+    rtn_matrix = feature_matrix.transpose() * diff_matrix
     return rtn_matrix
 
     """
@@ -62,20 +60,19 @@ def per_step(feature_array, weight_array, label_array):
     weight_array[j] = weight_array[j] - alpha*sum_v
     """
 def compute_weight(feature_list, label_list):
-    feature_array = ny.array(feature_list)
-    label_array = ny.array(label_list)
-    sample_num, feature_num = feature_array.shape
+    feature_matrix = ny.matrix(feature_list)
+    label_matrix = ny.matrix(label_list)
+    sample_num, feature_num = feature_matrix.shape
     weight_array =  ny.ones(feature_num)
-    rtn_next_w = []
-    alpha = 0.003
+    weight_matrix =  ny.matrix(weight_array)
+    alpha = 0.001
 
     for i in xrange(500):
-        tmp = alpha * per_step(feature_array,weight_array,label_array)
-        rtn_next_w =  ny.matrix(weight_array)+ tmp.transpose()
-        weight_array = rtn_next_w.tolist()[0]
-        print(i,weight_array)
+        tmp = alpha * per_step(feature_matrix,weight_matrix,label_matrix)
+        rtn_next_w =  weight_matrix + tmp.transpose()
+        weight_matrix = rtn_next_w
 
-    print weight_array
+    print weight_matrix
     return 0
 
 
